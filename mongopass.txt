@@ -1,0 +1,5 @@
+moongodb pass = SuCqAThlvyuYCh7O
+
+
+user: "imravishinde@gmail.com",
+pass: "nrof ggbz yeue lore", // app password
