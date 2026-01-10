@@ -3,3 +3,8 @@ moongodb pass = SuCqAThlvyuYCh7O
 
 user: "imravishinde@gmail.com",
 pass: "nrof ggbz yeue lore", // app password
+
+
+git remote add origin https://github.com/imravi05/analytical-dashboard.git
+git branch -M main
+git push -u origin main
