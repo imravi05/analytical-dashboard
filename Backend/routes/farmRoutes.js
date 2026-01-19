@@ -8,6 +8,8 @@ const router = express.Router();
 router.post("/add", controller.addFarm);
 router.put("/update/:farmId", controller.updateFarm);
 router.post("/add1", controller.addFarm1);
+router.delete("/delete/:farmId", controller.deleteFarm);
+router.get("/getfarm/:userId", controller.getFarmByUserId);
 
 
 export default router;

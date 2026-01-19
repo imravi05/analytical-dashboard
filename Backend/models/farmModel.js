@@ -11,18 +11,19 @@ const farmSchema = new mongoose.Schema({
         required: true
     },
     pincode_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pincode',
-        required: true
+        type: String, 
+        required: true,
+        trim: true
     },
     farm_coordinates: {
         type: {
             type: String,
-            enum: ['Polygon'], 
-            default: 'Polygon' // FIX: Removed the long whitespace string
+            enum: ['Polygon'],
+            required: true,
+            default: 'Polygon'
         },
         coordinates: {
-            type: [[[Number]]], 
+            type: [[[Number]]], // Array of arrays of arrays of numbers (GeoJSON format)
             required: true
         }
     },
