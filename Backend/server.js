@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import connectDB from './config/dbConnect.js';
 import farmRoutes from './routes/farmRoutes.js';
+import cropRoutes from './routes/cropRoutes.js';
 dotenv.config();
 
 connectDB();    
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // routes 
 app.use('/api/auth', authRoutes);
 app.use('/api/farms', farmRoutes);
+app.use('/api/crops', cropRoutes);
       
 
 
