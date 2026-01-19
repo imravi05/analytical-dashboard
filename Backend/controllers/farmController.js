@@ -23,14 +23,149 @@ const formatPolygon = (coords) => {
 
 // Example for brevity (Keep your full code):
 const addFarm = async (req, res) => {
-    // ... logic ...
+    try {
+        const { user_id, farm_name, pincode_id, farm_coordinates } = req.body;
+
+        // 1. Validation
+        if (!user_id || !farm_name || !pincode_id || !farm_coordinates) {
+            return res.status(400).json({ success: false, message: "user_id, farm_name, pincode_id and coordinates are required" });
+        }
+        if (!Array.isArray(farm_coordinates) || farm_coordinates.length < 3) {
+            return res.status(400).json({ success: false, message: "At least 3 boundary points required" });
+        }
+
+        // 2. Call Farmonaut API
+        // Note: Farmonaut usually expects [lat, lng], MongoDB uses [lng, lat]. 
+        // Ensure your input farm_coordinates match what Farmonaut needs.
+        const response = await axios.post(
+            "https://us-central1-farmbase-b2f7e.cloudfunctions.net/submitField",
+            {
+                CropCode: "2",
+                FieldName: farm_name,
+                PaymentType: 1,
+                SowingDate: Math.floor(Date.now() / 1000).toString(),
+                Points: farm_coordinates,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.FARMONAUT_API_KEY}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        const fieldId = response.data.FieldID;
+
+        if (!fieldId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Farmonaut failed to return a FieldID", 
+                apiResponse: response.data 
+            });
+        }
+
+        // 3. Save to MongoDB
+        const locationObject = formatPolygon(farm_coordinates);
+        
+        const newFarm = await Farm.create({
+            user_id,
+            farm_name,
+            pincode_id,
+            farm_coordinates: locationObject,
+            field_id: fieldId
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Farm added successfully",
+            data: newFarm,
+        });
+
+    } catch (error) {
+        console.error("Error in addFarm:", error);
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
 };
-// ... other functions ...
+
+const getFarmsByUser = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        if (!user_id) return res.status(400).json({ success: false, message: "user_id is required" });
+
+        const data = await Farm.find({ user_id });
+
+        res.status(200).json({ success: true, message: "Farms retrieved successfully", data });
+    } catch (error) {
+        console.error("Error in getFarmsByUser:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+const getFarmById = async (req, res) => {
+    try {
+        const { farm_id } = req.params;
+        if (!farm_id) return res.status(400).json({ success: false, message: "farm_id is required" });
+
+        const data = await Farm.findById(farm_id);
+
+        if (!data) return res.status(404).json({ success: false, message: "Farm not found" });
+
+        res.status(200).json({ success: true, message: "Farm retrieved successfully", data });
+    } catch (error) {
+        console.error("Error in getFarmById:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+const updateFarm = async (req, res) => {
+    try {
+        const { farm_id } = req.params;
+        const { farm_name, pincode_id, farm_coordinates } = req.body;
+
+        if (!farm_id) return res.status(400).json({ success: false, message: "farm_id is required" });
+
+        let updateData = {};
+        if (farm_name) updateData.farm_name = farm_name;
+        if (pincode_id) updateData.pincode_id = pincode_id;
+        if (farm_coordinates) updateData.farm_coordinates = formatPolygon(farm_coordinates);
+
+        const data = await Farm.findByIdAndUpdate(farm_id, updateData, { new: true });
+
+        if (!data) return res.status(404).json({ success: false, message: "Farm not found" });
+
+        res.status(200).json({ success: true, message: "Farm updated successfully", data });
+    } catch (error) {
+        console.error("Error in updateFarm:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+const deleteFarm = async (req, res) => {
+    try {
+        const { farm_id } = req.params;
+        if (!farm_id) return res.status(400).json({ success: false, message: "farm_id is required" });
+
+        const data = await Farm.findByIdAndDelete(farm_id);
+
+        if (!data) return res.status(404).json({ success: false, message: "Farm not found" });
+        
+        // Optional: Cascade delete associated FarmCrops
+        await FarmCrop.deleteMany({ farm_id: farm_id });
+
+        res.status(200).json({ success: true, message: "Farm deleted successfully" });
+    } catch (error) {
+        console.error("Error in deleteFarm:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
 
 export default {
     addFarm, // defined in your file
-    addFarm1, // defined in your file
-    updateFarm, // defined in your file
-    deleteFarm, // defined in your file
-    getFarmByUserId // defined in your file
+   // addFarm1, // defined in your file
+    updateFarm, 
+    deleteFarm, 
+    getFarmById,
+    getFarmsByUser
+    
 };

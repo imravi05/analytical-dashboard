@@ -5,5 +5,4 @@ const pincodeSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
     // Add city, state, etc. if needed
 });
-const Pincode = mongoose.model("Pincode", pincodeSchema);
-export default { Pincode };
+export const Pincode = mongoose.model("Pincode", pincodeSchema);
