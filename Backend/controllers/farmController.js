@@ -1,7 +1,8 @@
-import mongoose from "mongoose"; // Needed to generate IDs
+import mongoose from "mongoose";
 import FarmModel from "../models/farmModel.js";
 import axios from "axios";
 
+// Extract Farm model correctly from the default export object
 const { Farm } = FarmModel;
 
 // --- Helper Function: Validate & Close Polygon Loop ---
@@ -31,18 +32,14 @@ const formatPolygon = (coords) => {
 // 1. Add Farm (Simple Version)
 const addFarm = async (req, res) => {
   try {
-    let { user_id, farm_name, pincode_id, farm_coordinates } = req.body;
+    const { user_id, farm_name, pincode_id, farm_coordinates } = req.body;
     console.log("Request Body:", req.body);
 
-    if (!user_id) {
-        user_id = new mongoose.Types.ObjectId(); // Generates a new random User ID
-        console.log("Generated new user_id:", user_id);
-    }
-
-    if (!farm_name || !pincode_id || !farm_coordinates) {
+    // Validation: user_id is strictly required. Do not auto-generate.
+    if (!user_id || !farm_name || !pincode_id || !farm_coordinates) {
       return res.status(400).json({
         success: false,
-        message: "farm_name, pincode_id and coordinates are required",
+        message: "user_id, farm_name, pincode_id and coordinates are required",
       });
     }
     
@@ -78,18 +75,13 @@ const addFarm = async (req, res) => {
 // 2. Add Farm (With Farmonaut Integration)
 const addFarm1 = async (req, res) => {
   try {
-    let { user_id, farm_name, pincode_id, farm_coordinates } = req.body;
+    const { user_id, farm_name, pincode_id, farm_coordinates } = req.body;
 
-    // REQUIREMENT: Generate user_id if not present
-    if (!user_id) {
-        user_id = new mongoose.Types.ObjectId(); // Generates a new random User ID
-    }
-
-    // 1. Basic Validation
-    if (!farm_name || !pincode_id || !farm_coordinates) {
+    // Validation
+    if (!user_id || !farm_name || !pincode_id || !farm_coordinates) {
       return res.status(400).json({
         success: false,
-        message: "farm_name, pincode_id and coordinates are required",
+        message: "All fields including user_id are required",
       });
     }
 
@@ -147,7 +139,7 @@ const addFarm1 = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Farm added successfully",
-      farm_id: newFarm._id, // MongoDB generated ID
+      farm_id: newFarm._id,
       user_id: newFarm.user_id,
       data: newFarm,
     });
@@ -208,17 +200,17 @@ const updateFarm = async(req, res) => {
 
 const deleteFarm = async (req, res) => {
   try {
-    const { farm_id } = req.params;
+    // FIX: Using farmId instead of farm_id to match route: /delete/:farmId
+    const { farmId } = req.params;
 
-    if (!farm_id) {
+    if (!farmId) {
       return res.status(400).json({
         success: false,
-        message: "farm_id is required",
+        message: "farmId is required",
       });
     }
 
-    // FIX: Changed undefined 'deleteFarmModel' to mongoose method
-    const deletedFarm = await Farm.findByIdAndDelete(farm_id);
+    const deletedFarm = await Farm.findByIdAndDelete(farmId);
 
     if (!deletedFarm) {
       return res.status(404).json({
@@ -237,19 +229,18 @@ const deleteFarm = async (req, res) => {
   }
 };
 
-// FIX: Converted to a proper Express Controller (req, res)
 const getFarmByUserId = async (req, res) => {
   try {
-    // Expecting user_id in params (e.g., /farm/user/:user_id)
-    const { user_id } = req.params; 
+    // FIX: Using userId instead of user_id to match route: /getfarm/:userId
+    const { userId } = req.params; 
 
-    if(!user_id) {
+    if(!userId) {
         return res.status(400).json({ success: false, message: "User ID is required" });
     }
 
-    const farms = await Farm.find({ user_id });
+    // Database query matches field user_id with param userId
+    const farms = await Farm.find({ user_id: userId });
     
-    // FIX: Removed unreachable code and added response
     if (!farms || farms.length === 0) {
         return res.status(404).json({ success: false, message: "No farms found for this user" });
     }
