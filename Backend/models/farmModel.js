@@ -23,7 +23,7 @@ const farmSchema = new mongoose.Schema({
             default: 'Polygon'
         },
         coordinates: {
-            type: [[[Number]]], // Array of arrays of arrays of numbers (GeoJSON format)
+            type: [[[Number]]], // GeoJSON format
             required: true
         }
     },
@@ -38,6 +38,5 @@ const farmSchema = new mongoose.Schema({
 
 farmSchema.index({ farm_coordinates: '2dsphere' });
 
-// FIX: Use Named Export so you can import { Farm } elsewhere
-const Farm = mongoose.model("Farm", farmSchema);
-export default { Farm };
+// FIX: Use Named Export directly
+export const Farm = mongoose.model("Farm", farmSchema);

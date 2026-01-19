@@ -8,4 +8,5 @@ const cropSchema = new mongoose.Schema({
     image: String
 });
 
-export const Crop = mongoose.model("Crop", cropSchema);
+const Crop = mongoose.model("Crop", cropSchema);
+export default { Crop };

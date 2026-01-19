@@ -27,4 +27,5 @@ const farmCropSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-export const FarmCrop = mongoose.model("FarmCrop", farmCropSchema);
+const FarmCrop = mongoose.model("FarmCrop", farmCropSchema);
+export default { FarmCrop };
