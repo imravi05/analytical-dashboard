@@ -22,13 +22,15 @@ export const register = async (req, res) => {
         // 3. Hash Password
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = Date.now()+ 10*60*1000;
 
         // 4. Create User
         const newUser = await User.create({
             email,
             password: hashedPassword,
             name,
-            verificationOTP
+            verificationOTP,
+            otpExpires
         });
        
         await sendVerificationCode(email, verificationOTP);

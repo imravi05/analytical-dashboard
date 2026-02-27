@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
     default: false
   },
   verificationOTP:String,
+  otpExpiresAt: Date,
 
 },{timestamps:true});
 

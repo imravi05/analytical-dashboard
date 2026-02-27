@@ -75,9 +75,17 @@ const addFarm = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error in addFarm:", error);
-        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    if (error.response) {
+        // Farmonaut returned an error status (4xx, 5xx)
+        return res.status(error.response.status).json({ 
+            success: false, 
+            message: "Farmonaut API Error", 
+            error: error.response.data 
+        });
     }
+    console.error("Error in addFarm:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+}
 };
 
 const getFarmsByUser = async (req, res) => {
