@@ -1,12 +1,10 @@
 import mongoose from "mongoose";
-import { Farm } from "../models/farmModel.js"; // FIX: Named import
+import { Farm } from "../models/farmModel.js"; 
+import { FarmCrop } from "../models/farmCropModel.js"; // FIX: Added missing import
 import axios from "axios";
 
-// ... (Rest of your existing functions: formatPolygon, addFarm, addFarm1, updateFarm, deleteFarm, getFarmByUserId)
-// ... (Ensure you DO NOT remove the logic, just update the import at the top)
-
+// Helper function
 const formatPolygon = (coords) => {
-    // ... (Keep existing logic)
     const ring = structuredClone(coords);
     if (ring.length > 0) {
         const first = ring[0];
@@ -19,9 +17,6 @@ const formatPolygon = (coords) => {
     return { type: 'Polygon', coordinates: [ring] };
 };
 
-// ... (Keep your existing addFarm, addFarm1, updateFarm, deleteFarm, getFarmByUserId implementations here)
-
-// Example for brevity (Keep your full code):
 const addFarm = async (req, res) => {
     try {
         const { user_id, farm_name, pincode_id, farm_coordinates } = req.body;
@@ -35,8 +30,6 @@ const addFarm = async (req, res) => {
         }
 
         // 2. Call Farmonaut API
-        // Note: Farmonaut usually expects [lat, lng], MongoDB uses [lng, lat]. 
-        // Ensure your input farm_coordinates match what Farmonaut needs.
         const response = await axios.post(
             "https://us-central1-farmbase-b2f7e.cloudfunctions.net/submitField",
             {
@@ -149,7 +142,8 @@ const deleteFarm = async (req, res) => {
 
         if (!data) return res.status(404).json({ success: false, message: "Farm not found" });
         
-        // Optional: Cascade delete associated FarmCrops
+        // Cascade delete associated FarmCrops
+        // FIX: This works now because FarmCrop is imported
         await FarmCrop.deleteMany({ farm_id: farm_id });
 
         res.status(200).json({ success: true, message: "Farm deleted successfully" });
@@ -159,13 +153,10 @@ const deleteFarm = async (req, res) => {
     }
 };
 
-
 export default {
-    addFarm, // defined in your file
-   // addFarm1, // defined in your file
+    addFarm, 
     updateFarm, 
     deleteFarm, 
     getFarmById,
     getFarmsByUser
-    
 };

@@ -2,7 +2,7 @@ import { Farm } from "../models/farmModel.js";
 import { FarmCrop } from "../models/farmCropModel.js";
 import { Crop } from "../models/cropModel.js";
 import { Pincode } from "../models/pincodeModel.js";
-import mongoose from "mongoose";
+
 
 // =======================
 // FARM CROP APIs
